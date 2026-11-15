@@ -49,6 +49,21 @@ app.get("/book/:id", async(req,res)=>{
     res.send(result)
 })
 
+http://localhost:5000/my-books/email
+app.get("/my-books/:email", async(req,res)=>{
+  const {email}= req.params
+  const result= await bookCollection.find({email: email}).toArray()
+  res.send(result)
+})
+
+
+
+http://localhost:5000/borrows/email
+app.get("/borrows/:email", async(req,res)=>{
+  const {email}= req.params
+  const result = await borrowsCollection.find({userEmail: email}).toArray()
+  res.send(result)
+})
 
 // app.get("/my-book", async(req,res)=>{
 //   const result= await bookCollection.find()
