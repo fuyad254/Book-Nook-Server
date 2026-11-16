@@ -60,7 +60,7 @@ app.get("/book/:id", async(req,res)=>{
     res.send(result)
 })
 
-http://localhost:5000/my-books/email
+// http://localhost:5000/my-books/email
 app.get("/my-books/:email", async(req,res)=>{
   const {email}= req.params
   const result= await bookCollection.find({email: email}).toArray()
@@ -69,7 +69,7 @@ app.get("/my-books/:email", async(req,res)=>{
 
 
 
-http://localhost:5000/borrows/email
+// http://localhost:5000/borrows/email
 app.get("/borrows/:email", async(req,res)=>{
   const {email}= req.params
   const result = await borrowsCollection.find({userEmail: email}).toArray()
@@ -88,6 +88,13 @@ app.post('/add-book' , async(req, res) => {
     res.send({messege: "data come okey"})
 })
 
+
+app.patch("/my-books/:id", async(req,res)=>{
+    const {id}= req.params
+    const EditData= req.body
+    const result= await bookCollection.updateOne({_id: new ObjectId(id)}, {$set:EditData})
+    res.json(result)
+  })
 
 app.delete("/my-borrow/:id", async(req,res)=>{
   const {id}= req.params
