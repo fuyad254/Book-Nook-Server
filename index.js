@@ -2,6 +2,7 @@ import express from "express";
 import { MongoClient, ObjectId } from "mongodb";
 import "dotenv/config";
 import cors from "cors";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 
 const app = express();
 
@@ -40,6 +41,31 @@ try {
   console.dir(err);
 }
 
+const verifyToken = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).send({ msg: "Unauthorized!" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).send({ msg: "Unauthorized!" });
+  }
+
+  const JWTS = createRemoteJWKSet(
+    new URL("http://localhost:3000/api/auth/jwks"),
+  );
+
+  try {
+    const { payload } = await jwtVerify(token, JWTS);
+    next();
+  } catch (error) {
+    return res.status(500).send({ msg: "Server Error" });
+  }
+};
+
 // http://localhost:5000/books
 app.get("/books", async (req, res) => {
   const result = await bookCollection.find().toArray();
@@ -47,35 +73,39 @@ app.get("/books", async (req, res) => {
 });
 
 // http://localhost:5000/book/id
-app.get("/book/:id", async (req, res) => {
+app.get("/book/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const result = await bookCollection.findOne({ _id: new ObjectId(id) });
   res.send(result);
 });
 
 // http://localhost:5000/my-books/email
-app.get("/my-books/:email", async (req, res) => {
+app.get("/my-books/:email", verifyToken, async (req, res) => {
   const { email } = req.params;
   const result = await bookCollection.find({ email: email }).toArray();
   res.send(result);
 });
 
 // http://localhost:5000/borrows/email
-app.get("/borrows/:email", async (req, res) => {
+app.get("/borrows/:email", verifyToken, async (req, res) => {
   const { email } = req.params;
   const result = await borrowsCollection.find({ userEmail: email }).toArray();
   res.send(result);
 });
 
 app.get("/latest-books", async (req, res) => {
-  const result = await bookCollection.find().sort({ createdAt: -1 }).limit(6).toArray();
-  res.send(result)
+  const result = await bookCollection
+    .find()
+    .sort({ createdAt: -1 })
+    .limit(6)
+    .toArray();
+  res.send(result);
 });
 
 // http://localhost:5000/add-book
-app.post("/add-book", async (req, res) => {
+app.post("/add-book", verifyToken, async (req, res) => {
   const data = req.body;
-   const bookData = {
+  const bookData = {
     ...data,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -85,7 +115,7 @@ app.post("/add-book", async (req, res) => {
   res.send({ messege: "data recive sucssesful" });
 });
 
-app.patch("/my-books/:id", async (req, res) => {
+app.patch("/my-books/:id",verifyToken, async (req, res) => {
   const { id } = req.params;
   const EditData = req.body;
   const result = await bookCollection.updateOne(
@@ -95,17 +125,21 @@ app.patch("/my-books/:id", async (req, res) => {
   res.json(result);
 });
 
-app.patch("/my-borrow/:id", async(req,res)=>{
-  const{id}= req.params;
-  console.log(id, "form return book");
-  const result= await bookCollection.updateOne({_id: new ObjectId(id)}, {$inc: {copies: -1}})
-})
+app.patch("/my-borrow/:id", async (req, res) => {
+  const { id } = req.params;
+  const result = await bookCollection.updateOne(
+    { _id: new ObjectId(id) },
+    { $inc: { copies: -1 } },
+  );
+});
 
-app.patch("/my-borrow-return/:id", async(req,res)=>{
-  const{id}= req.params
-  console.log(id);
-  const result= bookCollection.updateOne({_id: new ObjectId(id)}, {$inc: {copies: 1}})
-})
+app.patch("/my-borrow-return/:id", async (req, res) => {
+  const { id } = req.params;
+  const result = bookCollection.updateOne(
+    { _id: new ObjectId(id) },
+    { $inc: { copies: 1 } },
+  );
+});
 
 app.delete("/my-borrow/:id", async (req, res) => {
   const { id } = req.params;
