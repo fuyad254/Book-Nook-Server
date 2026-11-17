@@ -12,6 +12,10 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send("Book Nook Server is Running Successfully!");
+});
+
 const client = new MongoClient(process.env.MONGODB_URI);
 
 export async function connectToMongoDB() {
