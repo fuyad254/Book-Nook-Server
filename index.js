@@ -194,3 +194,5 @@ app.post("/my-borrow", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`server is running on ${PORT}`);
 });
+
+export default app
