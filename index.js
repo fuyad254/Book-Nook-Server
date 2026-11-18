@@ -135,14 +135,16 @@ app.patch("/my-borrow/:id", async (req, res) => {
     { _id: new ObjectId(id) },
     { $inc: { copies: -1 } },
   );
+  res.json(result);
 });
 
 app.patch("/my-borrow-return/:id", async (req, res) => {
   const { id } = req.params;
-  const result = bookCollection.updateOne(
+  const result = await bookCollection.updateOne(
     { _id: new ObjectId(id) },
     { $inc: { copies: 1 } },
   );
+  res.json(result);
 });
 
 app.delete("/my-borrow/:id", async (req, res) => {
