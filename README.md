@@ -1,168 +1,207 @@
-📚 Book Nook – Server
+# 📚 Book Nook — Backend API
 
-Backend API for Book Nook, a book library management application. Built with Node.js, Express.js, and MongoDB.
+<p align="center">   <strong>A secure REST API powering the Book Nook book-sharing platform.</strong> </p>
 
-🔗 Project Links
+<p align="center">   <a href="https://book-nook-seven.vercel.app/">     <img src="https://img.shields.io/badge/Frontend-Live_Demo-2E7D32?style=for-the-badge&logo=vercel&logoColor=white" alt="Frontend Live Demo" />   </a>   <a href="https://book-nook-server-orpin.vercel.app/">     <img src="https://img.shields.io/badge/Backend-API_Server-007ACC?style=for-the-badge&logo=vercel&logoColor=white" alt="Backend API" />   </a>   <a href="https://github.com/fuyad254/Book-Nook">     <img src="https://img.shields.io/badge/Frontend-Repository-181717?style=for-the-badge&logo=github&logoColor=white" alt="Frontend Repo" />   </a>   <a href="https://github.com/fuyad254/Book-Nook-Server">     <img src="https://img.shields.io/badge/Backend-Repository-181717?style=for-the-badge&logo=github&logoColor=white" alt="Backend Repo" />   </a> </p>
 
-Live Website: Add your live client URL here
+---
 
-Client Repository: [Book Nook Client](https://github.com/fuyad254/Book-Nook)
+## 🌟 About
 
+**Book Nook Backend** is the REST API for the Book Nook application, a community-driven book-sharing platform.
 
-🛠️ Technologies Used
+Built with Node.js, Express, and MongoDB, it handles book management, borrowing operations, user-specific collections, and secure access to protected resources using JWT authentication.
 
-Node.js
+## ✨ Features
 
-Express.js
+- 📚 Retrieve all books from the library
+- 🔍 Fetch individual book details
+- 🆕 Get the latest added books
+- ➕ Add new books
+- ✏️ Update existing book information
+- 🗑️ Delete books
+- 👤 Retrieve books belonging to a user
+- 🤝 Manage borrowing records
+- 📥 Borrow and return books
+- 🔐 JWT authentication and verification
+- 🛡️ Protected endpoints
+- 🍃 MongoDB database integration
+- 🔄 Prevent duplicate borrowing records
 
-MongoDB
+## 🌐 Live API
 
-JWT Authentication (JOSE)
+| Resource                | URL                                                                |
+| ----------------------- | ------------------------------------------------------------------ |
+| 🚀 Backend API          | [Book Nook Server](https://book-nook-server-orpin.vercel.app/)     |
+| 💻 Frontend Application | [Book Nook](https://book-nook-seven.vercel.app/)                   |
+| 🖥️ Frontend Source     | [Frontend Repository](https://github.com/fuyad254/Book-Nook)       |
+| ⚙️ Backend Source       | [Backend Repository](https://github.com/fuyad254/Book-Nook-Server) |
 
-CORS
+## 🛠️ Tech Stack
 
-dotenv
+<p align="center">   <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" />   <img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express.js" />   <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />   <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript" /> </p>
 
-✨ Key Features
+| Technology | Purpose                            |
+| ---------- | ---------------------------------- |
+| Node.js    | JavaScript runtime                 |
+| Express.js | REST API framework                 |
+| MongoDB    | NoSQL database                     |
+| CORS       | Cross-origin resource sharing      |
+| dotenv     | Environment variable configuration |
+| jose       | JWT verification and JWKS support  |
 
-Fetch all books and latest books.
+## 🏗️ Architecture
 
-Add, update, and delete books.
+```mermaid
+flowchart TD
+A[Frontend / Client] -->|HTTP Requests| B[Express REST API]
+B --> C[CORS & Middleware]
+C --> D{Protected Route?}
+D -->|Yes| E[JWT Verification via JWKS]
+D -->|No| F[API Controller]
+E -->|Valid Token| F
+E -->|Invalid Token| G[401 / Error Response]
+F --> H[(MongoDB)]
+H --> I[Books Collection]
+H --> J[Borrow Collection]
+```
 
-Get book details by ID.
+## 📡 API Endpoints
 
-Manage user-added books.
+### 📚 Books
 
-Borrow and return books.
+| Method   | Endpoint        | Description        | Auth |
+| -------- | --------------- | ------------------ | ---- |
+| `GET`    | `/books`        | Get all books      | ❌    |
+| `GET`    | `/book/:id`     | Get a book by ID   | ✅    |
+| `GET`    | `/latest-books` | Get latest 6 books | ❌    |
+| `POST`   | `/add-book`     | Add a new book     | ✅    |
+| `PATCH`  | `/my-books/:id` | Update a book      | ✅    |
+| `DELETE` | `/my-books/:id` | Delete a book      | ❌    |
 
-View borrowed books by user.
+### 👤 User Books
 
-Prevent duplicate borrowing of the same book.
+| Method | Endpoint           | Description             | Auth |
+| ------ | ------------------ | ----------------------- | ---- |
+| `GET`  | `/my-books/:email` | Get books by user email | ✅    |
 
-Secure protected routes using JWT verification.
+### 🤝 Borrowing
 
-⚙️ Installation & Setup
+| Method   | Endpoint                | Description                    | Auth |
+| -------- | ----------------------- | ------------------------------ | ---- |
+| `GET`    | `/borrows/:email`       | Get a user's borrowed books    | ✅    |
+| `POST`   | `/my-borrow`            | Create a borrow record         | ❌    |
+| `PATCH`  | `/my-borrow/:id`        | Decrease book copies           | ❌    |
+| `PATCH`  | `/my-borrow-return/:id` | Increase book copies on return | ❌    |
+| `DELETE` | `/my-borrow/:id`        | Remove a borrow record         | ❌    |
 
-1. Clone the repository
+> **Auth:** Protected endpoints require a valid JWT Bearer token in the `Authorization` header.
 
+## 🔐 Authentication
+
+Protected routes use JWT verification powered by **Better Auth's JWKS endpoint**.
+
+The backend retrieves the public signing keys from the frontend authentication server and verifies incoming tokens using the `jose` library.
+
+Example request header:
+
+```http
+Authorization: Bearer <your_jwt_token>
+```
+
+## 🍃 Database
+
+Book Nook uses MongoDB with the following collections:
+
+| Collection | Description                             |
+| ---------- | --------------------------------------- |
+| `book`     | Stores book information and book copies |
+| `borrow`   | Stores borrowing records                |
+
+A unique compound index on `userEmail` and `bookId` helps prevent a user from borrowing the same book more than once.
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) installed
+- npm
+- MongoDB database
+- Git
+
+### 1️⃣ Clone the repository
+
+```bash
 git clone https://github.com/fuyad254/Book-Nook-Server.git
-
-2. Navigate to the project directory
-
 cd Book-Nook-Server
+```
 
-3. Install dependencies
+### 2️⃣ Install dependencies
 
+```bash
 npm install
+```
+### 3️⃣ Environment configuration
 
-4. Create a .env file
+Create a `.env` file in the root directory:
 
-MONGODB_URI=your_mongodb_connection_string
-CLIENT_URL=your_client_application_url
+```env
+MONGODB_URI=your-mongodb-connection-string
+CLIENT_URL=http://localhost:3000
+```
 
-5. Start the server
+| Variable      | Description                                               |
+| ------------- | --------------------------------------------------------- |
+| `MONGODB_URI` | MongoDB connection string                                 |
+| `CLIENT_URL`  | Frontend/auth server URL used for JWKS token verification |
 
+> ⚠️ Keep your environment variables private. Never upload your `.env` file or credentials to GitHub.
+
+### 4️⃣ Start the server
+
+```bash
 node index.js
+```
 
-Server runs on:
+The backend server runs at:
 
+```
 http://localhost:5000
+```
 
-📡 API Endpoints
+To verify the server is running, open the URL above. You should receive:
 
-Method
+```
+Book Nook Server is Running Successfully!
+```
+## 📂 Project Structure
 
-Endpoint
+```
+Book-Nook-Server/
+├── index.js
+├── package.json
+├── package-lock.json
+├── vercel.json
+├── .gitignore
+└── .env
+```
 
-Description
+## 🔒 Security & Validation
 
-GET
+- JWT authentication for protected endpoints
+- JWKS-based public key verification
+- CORS enabled for client communication
+- Duplicate borrowing prevention
+- Environment variables for sensitive configuration
+- MongoDB unique index for borrow records
 
-/books
+## 👨‍💻 Author
 
-Get all books
+**Fuyad**
+Frontend Developer | Full-Stack Developer
 
-GET
+<p align="center">   ⭐ If you find this project useful, consider giving it a star! </p>
 
-/latest-books
+---
 
-Get latest books
-
-GET
-
-/book/:id
-
-Get book details
-
-GET
-
-/my-books/:email
-
-Get user's books
-
-GET
-
-/borrows/:email
-
-Get borrowed books
-
-POST
-
-/add-book
-
-Add a new book
-
-PATCH
-
-/my-books/:id
-
-Update a book
-
-PATCH
-
-/my-borrow/:id
-
-Update available copies
-
-PATCH
-
-/my-borrow-return/:id
-
-Return book copies
-
-POST
-
-/my-borrow
-
-Borrow a book
-
-DELETE
-
-/my-borrow/:id
-
-Delete borrow record
-
-DELETE
-
-/my-books/:id
-
-Delete a book
-
-🗄️ Database
-
-Database: bookNook
-
-Collections:
-
-book
-
-borrow
-
-🔐 Authentication
-
-Protected API routes use JWT verification through JOSE.
-
-Include the following header when accessing protected routes:
-
-
-Book Nook – A simple and efficient book library management system.
+<p align="center">   \<strong>Built with ❤️ to make sharing books easier.\</strong> </p>
